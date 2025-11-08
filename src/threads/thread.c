@@ -30,7 +30,7 @@ static struct list ready_list;  // Ensure this ends with ;
 static struct list all_list;  // This should now be parsable
 
 /* List of processes in THREAD_BLOCKED state waiting to be woken by timer. */  // NEW
-static struct list sleep_list;
+struct list sleep_list;
  // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
 /* Idle thread. */
@@ -81,7 +81,7 @@ static tid_t allocate_tid (void);
  // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
 /* Comparison function for sorting sleep_list by wake_ticks (earliest first). */  // NEW
-static bool
+bool
 thread_wake_less (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED)
 {
   const struct thread *ta = list_entry (a, struct thread, elem);
