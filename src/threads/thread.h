@@ -5,26 +5,26 @@
 #include <list.h>
 #include <stdint.h>
 
-/* Thread identifier type.
-   You can redefine this to whatever type you like. */
-typedef int tid_t;
-#define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
-
-/* Thread states. */
+/** States in a thread's life cycle. */
 enum thread_status
   {
-    THREAD_RUNNING,                     /* Running thread. */
-    THREAD_READY,                       /* Not running but ready to run. */
-    THREAD_BLOCKED,                     /* Waiting for an event to trigger. */
-    THREAD_DYING                        /* About to be destroyed. */
+    THREAD_RUNNING,     /**< Running thread. */
+    THREAD_READY,       /**< Not running but ready to run. */
+    THREAD_BLOCKED,     /**< Waiting for an event to trigger. */
+    THREAD_DYING        /**< About to be destroyed. */
   };
 
-/* Priorities. */
-#define PRI_MIN 0                       /* Lowest priority. */
-#define PRI_DEFAULT 31                  /* Default priority. */
-#define PRI_MAX 63                      /* Highest priority. */
+/** Thread identifier type.
+   You can redefine this to whatever type you like. */
+typedef int tid_t;
+#define TID_ERROR ((tid_t) -1)  /**< Error value for tid_t. */
 
-/* A kernel thread or user process.
+/** Thread priorities. */
+#define PRI_MIN 0               /**< Lowest priority. */
+#define PRI_DEFAULT 31          /**< Default priority. */
+#define PRI_MAX 63              /**< Highest priority. */
+
+/** A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
    thread structure itself sits at the very bottom of the page
@@ -74,7 +74,7 @@ enum thread_status
    the `magic' value for the running thread is preserved.  Stack
    overflow will normally change this value, triggering the
    assertion. */
-/* The `elem' member has a dual purpose.  It can be an element in
+/** The `elem' member has a dual purpose.  It can be an element in
    the run queue (thread.c), or it can be an element in a
    semaphore wait list (synch.c).  It can be used these two ways
    only because they are mutually exclusive: only a thread in the
@@ -103,7 +103,7 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
-/* If false (default), use round-robin scheduler.
+/** If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
@@ -112,11 +112,13 @@ void thread_init (void);
 void thread_start (void);
 
 void thread_tick (void);
-enum thread_status thread_get_status (void);
-void thread_set_status (enum thread_status);
+void thread_print_stats (void);
+
+typedef void thread_func (void *aux);  // FIXED: Add this typedef
 
 tid_t thread_create (const char *name, int priority,
                      thread_func *, void *);
+
 void thread_block (void);
 void thread_unblock (struct thread *);
 
@@ -127,7 +129,7 @@ const char *thread_name (void);
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
 
-/* Performs some operation on thread t, given auxiliary data AUX. */
+/** Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
 void thread_foreach (thread_action_func *, void *);
 
