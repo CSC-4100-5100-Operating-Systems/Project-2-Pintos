@@ -90,6 +90,23 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
+    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+    /* Owned by thread.c. */
+    tid_t tid;                          /* Thread identifier. */
+    enum thread_status status;          /* Thread state. */
+    char name[16];                      /* Name (for debugging purposes). */
+    uint8_t *stack;                     /* Saved stack pointer. */
+    int priority;                       /* Priority. */
+    int64_t wake_ticks;                 /* Absolute ticks to wake up (for alarm clock). */  // NEW FIELD
+    struct list_elem allelem;           /* List element for all threads list. */
+
+    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+
+    /* Shared between thread.c and synch.c. */
+    struct list_elem elem;              /* List element. */
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
