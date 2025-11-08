@@ -84,17 +84,16 @@ timer_elapsed (int64_t then)
   return timer_ticks () - then;
 }
 
-
-// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
 timer_sleep (int64_t ticks) 
 {
-if (ticks <= 0) {
-    return;  // Do nothing for non-positive ticks (as per original behavior)
+  int64_t start = timer_ticks ();
+  ASSERT (intr_get_level () == INTR_ON);
+  while (timer_elapsed (start) < ticks) 
+    thread_yield ();
 }
-// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
    turned on. */
@@ -171,25 +170,7 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
-  thread_tick ();
-
-    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
-  // NEW: Wake up threads whose wake time has arrived (sleep_list is sorted)
-  while (!list_empty (&sleep_list)) {
-    struct list_elem *front = list_front (&sleep_list);
-    struct thread *t = list_entry (front, struct thread, elem);
-    
-    if (t->wake_ticks > ticks) {
-      break;  // Remaining threads wake later (list is sorted)
-    }
-
-    list_pop_front (&sleep_list);
-    thread_unblock (t);  // Wake the thread (adds to ready_list)
-  }
-    
-    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE
-    
-}
+  thread_tick 
 
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
