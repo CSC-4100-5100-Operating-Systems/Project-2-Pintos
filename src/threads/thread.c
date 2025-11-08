@@ -24,6 +24,17 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+/* List of processes in THREAD_BLOCKED state waiting to be woken by timer. */  // NEW
+static struct list sleep_list
+
+// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+/* List of all processes.  Processes are added to this list
+   when they are created and removed when they exit. */
+static struct list all_list;
+
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
@@ -71,6 +82,23 @@ static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
+
+
+ // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+/* Comparison function for sorting sleep_list by wake_ticks (earliest first). */  // NEW
+static bool
+thread_wake_less (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED)
+{
+  const struct thread *ta = list_entry (a, struct thread, elem);
+  const struct thread *tb = list_entry (b, struct thread, elem);
+  return ta->wake_ticks < tb->wake_ticks;
+}
+
+ // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+
+
+
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -92,13 +120,16 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
-
+  list_init (&sleep_list);  // NEW: Initialize sleep list
+  // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+   
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
 }
+
 
 /* Starts preemptive thread scheduling by enabling interrupts.
    Also creates the idle thread. */
