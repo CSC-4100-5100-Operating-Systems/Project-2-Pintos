@@ -20,28 +20,18 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
+ // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
-static struct list ready_list;
+static struct list ready_list;  // Ensure this ends with ;
 
-// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
+/* List of all processes.  Processes are added to this list
+   when they are created and removed when they exit. */
+static struct list all_list;  // This should now be parsable
 
 /* List of processes in THREAD_BLOCKED state waiting to be woken by timer. */  // NEW
-static struct list sleep_list
-
-// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
-
-/* List of all processes.  Processes are added to this list
-   when they are created and removed when they exit. */
-static struct list all_list;
-
-/* List of all processes.  Processes are added to this list
-   when they are created and removed when they exit. */
-static struct list all_list;
-
-/* List of all processes.  Processes are added to this list
-   when they are first scheduled and removed when they exit. */
-static struct list all_list;
+static struct list sleep_list;
+ // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
 /* Idle thread. */
 static struct thread *idle_thread;
