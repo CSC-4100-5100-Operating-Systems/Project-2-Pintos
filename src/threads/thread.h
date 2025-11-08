@@ -5,21 +5,21 @@
 #include <list.h>
 #include <stdint.h>
 
-/* States in a thread's life cycle. */
-enum thread_status
-  {
-    THREAD_RUNNING,     /* Running thread. */
-    THREAD_READY,       /* Not running but ready to run. */
-    THREAD_BLOCKED,     /* Waiting for an event to trigger. */
-    THREAD_DYING        /* About to be destroyed. */
-  };
-
 /* Thread identifier type.
    You can redefine this to whatever type you like. */
 typedef int tid_t;
 #define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
 
-/* Thread priorities. */
+/* Thread states. */
+enum thread_status
+  {
+    THREAD_RUNNING,                     /* Running thread. */
+    THREAD_READY,                       /* Not running but ready to run. */
+    THREAD_BLOCKED,                     /* Waiting for an event to trigger. */
+    THREAD_DYING                        /* About to be destroyed. */
+  };
+
+/* Priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
@@ -71,10 +71,10 @@ typedef int tid_t;
 
    The first symptom of either of these problems will probably be
    an assertion failure in thread_current(), which checks that
-   the `magic' member of the running thread's `struct thread' is
-   set to THREAD_MAGIC.  Stack overflow will normally change this
-   value, triggering the assertion. */
-/** The `elem' member has a dual purpose.  It can be an element in
+   the `magic' value for the running thread is preserved.  Stack
+   overflow will normally change this value, triggering the
+   assertion. */
+/* The `elem' member has a dual purpose.  It can be an element in
    the run queue (thread.c), or it can be an element in a
    semaphore wait list (synch.c).  It can be used these two ways
    only because they are mutually exclusive: only a thread in the
@@ -112,11 +112,11 @@ void thread_init (void);
 void thread_start (void);
 
 void thread_tick (void);
-void thread_print_stats (void);
+enum thread_status thread_get_status (void);
+void thread_set_status (enum thread_status);
 
-typedef void thread_func (void *aux);
-tid_t thread_create (const char *name, int priority, thread_func *, void *);
-
+tid_t thread_create (const char *name, int priority,
+                     thread_func *, void *);
 void thread_block (void);
 void thread_unblock (struct thread *);
 
