@@ -88,6 +88,8 @@ timer_elapsed (int64_t then)
   return timer_ticks () - then;
 }
 
+
+// LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
