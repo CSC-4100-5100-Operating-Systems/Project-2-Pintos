@@ -7,7 +7,9 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-  
+static void wake_sleeping_threads (void);
+static bool wake_tick_compare (const struct list_elem *a, const struct list_elem *b, void *aux);
+
 /* See [8254] for hardware details of the 8254 timer chip. */
 
 #if TIMER_FREQ < 19
@@ -23,6 +25,7 @@ static int64_t ticks;
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
 static unsigned loops_per_tick;
+static struct list sleep_list;
 
 static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
@@ -35,6 +38,7 @@ static void real_time_delay (int64_t num, int32_t denom);
 void
 timer_init (void) 
 {
+  list_init(&sleep_list);
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
 }
@@ -87,14 +91,23 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-timer_sleep (int64_t ticks) 
+timer_sleep (int64_t sleep_ticks)
 {
-  int64_t start = timer_ticks ();
+    if (sleep_ticks <= 0)
+        return;
 
-  ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+    int64_t wake = timer_ticks() + sleep_ticks;
+
+    enum intr_level old = intr_disable();
+    struct thread *t = thread_current();
+    t->wake_tick = wake;
+
+    list_insert_ordered(&sleep_list, &t->elem, wake_tick_compare, NULL);
+
+    thread_block();
+    intr_set_level(old);
 }
+
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
    turned on. */
@@ -170,9 +183,13 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
-  ticks++;
-  thread_tick ();
+    ticks++;
+    thread_tick();
+
+    /* Wake threads whose time has come */
+    wake_sleeping_threads();
 }
+
 
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
@@ -243,4 +260,29 @@ real_time_delay (int64_t num, int32_t denom)
      the possibility of overflow. */
   ASSERT (denom % 1000 == 0);
   busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000)); 
+}
+
+bool wake_tick_compare(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED)
+{
+    struct thread *ta = list_entry(a, struct thread, elem);
+    struct thread *tb = list_entry(b, struct thread, elem);
+    return ta->wake_tick < tb->wake_tick;
+}
+
+static void
+wake_sleeping_threads(void)
+{
+    int64_t current = ticks;
+
+    while (!list_empty(&sleep_list)) 
+    {
+        struct thread *t =
+            list_entry(list_front(&sleep_list), struct thread, elem);
+
+        if (t->wake_tick > current)
+            break;
+
+        list_pop_front(&sleep_list);
+        thread_unblock(t);
+    }
 }
