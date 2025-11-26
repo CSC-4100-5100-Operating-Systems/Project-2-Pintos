@@ -88,23 +88,13 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int64_t wake_tick;                  // adding for alarm clock to not use busy waiting
     struct list_elem allelem;           /* List element for all threads list. */
 
-    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
-
-    /* Owned by thread.c. */
-    tid_t tid;                          /* Thread identifier. */
-    enum thread_status status;          /* Thread state. */
-    char name[16];                      /* Name (for debugging purposes). */
-    uint8_t *stack;                     /* Saved stack pointer. */
-    int priority;                       /* Priority. */
-    struct list_elem allelem;           /* List element for all threads list. */
-
-    // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
-
-
-    /* Shared between thread.c and synch.c. */
-    struct list_elem elem;              /* List element. */
+    // priority attributes
+    int base_priority;
+    struct list locks;
+    struct lock *lock_waiting;
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -153,5 +143,11 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+
+void thread_update_priority(struct thread *t);
+void thread_donate_priority(struct thread *t);
+void thread_remove_lock(struct lock *lock);
+bool thread_compare_priority(const struct list_elem *a, const struct list_elem *b, void *aux);
+
 
 #endif /* threads/thread.h */
