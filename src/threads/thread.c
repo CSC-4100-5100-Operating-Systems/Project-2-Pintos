@@ -33,7 +33,7 @@ static struct list ready_list;
 // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
 /* List of processes in THREAD_BLOCKED state waiting to be woken by timer. */  // NEW
-static struct list sleep_list
+static struct list sleep_list;
 
 // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
 
@@ -102,7 +102,7 @@ thread_wake_less (const struct list_elem *a, const struct list_elem *b, void *au
 {
   const struct thread *ta = list_entry (a, struct thread, elem);
   const struct thread *tb = list_entry (b, struct thread, elem);
-  return ta->wake_ticks < tb->wake_ticks;
+  return ta->wake_tick < tb->wake_tick;
 }
 
  // LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE LFB CODE 
